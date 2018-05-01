@@ -79,18 +79,20 @@ class Calender extends PureComponent {
     } = this.state;
     return (
       <div>
-        <select onChange={this.handleProjectChange}>
-          <option value="none">--篩選專案--</option>
-          {projectList.map((project) => (
-            <option key={project}>{project}</option>
-          ))}
-        </select>
-        <select onChange={this.handlePersonChange}>
-          <option value="none">--篩選人員--</option>
-          {personList.map((person) => (
-            <option key={person}>{person}</option>
-          ))}
-        </select>
+        <Box pb="2em">
+          <select onChange={this.handleProjectChange}>
+            <option value="none">--篩選專案--</option>
+            {projectList.map((project) => (
+              <option key={project}>{project}</option>
+            ))}
+          </select>
+          <select onChange={this.handlePersonChange}>
+            <option value="none">--篩選人員--</option>
+            {personList.map((person) => (
+              <option key={person}>{person}</option>
+            ))}
+          </select>
+        </Box>
         <Box pt="66%" position="relative">
           <Box position="absolute" top="0" right="0" bottom="0" left="0">
             <BigCalendar

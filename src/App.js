@@ -3,6 +3,7 @@ import { GoogleSheetsApi } from '@lourd/react-google-sheet'
 
 import Blob from './Blob';
 import SheetData from './SheetData';
+import Box from './components/Box';
 
 const CLIENT_ID = '871831599839-67kmk9oreergrthq16b64qrdb41b4jcv.apps.googleusercontent.com';
 const API_KEY = 'AIzaSyA3SEKynUtt2EO2r_LnBTtlL4xkmNu6H-E';
@@ -19,9 +20,13 @@ class App extends PureComponent {
               ) : error ? (
                 <Blob data={error} />
               ) : signedIn ? (
-                <button onClick={signout}>Sign Out</button>
+                <Box py="1em">
+                  <button onClick={signout}>Sign Out</button>
+                </Box>
               ) : (
-                <button onClick={authorize}>Authorize</button>
+                <Box py="1em">
+                  <button onClick={authorize}>Authorize</button>
+                </Box>
               )}
               {signedIn && <SheetData id="1iwEuePpqoK3rGHd4ml54Bji4ZUm2IpqLlefs6f3Uzac" range="A:F" />}
             </div>
