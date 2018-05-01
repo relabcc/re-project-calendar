@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { GoogleSheetsApi } from '@lourd/react-google-sheet'
+import { GoogleSheetsApi } from './vendor/react-google-sheet'
 
 import Blob from './Blob';
 import SheetData from './SheetData';

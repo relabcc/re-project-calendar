@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import fromPairs from 'lodash/fromPairs';
 
-import { GoogleSheet } from '@lourd/react-google-sheet'
+import { GoogleSheet } from './vendor/react-google-sheet';
 
 import Calendar from './Calendar';
 
