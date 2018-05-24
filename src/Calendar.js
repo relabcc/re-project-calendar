@@ -62,7 +62,12 @@ class Calender extends PureComponent {
 
   handleExport = () => {
     const { events, sheetApi } = this.props;
-    const calendar = generateProjectCalendar(sheetApi, events.filter(this.projectFilter), this.state.selectedProject);
+    this.setState({ exporting: true });
+    generateProjectCalendar(sheetApi, events.filter(this.projectFilter), this.state.selectedProject)
+      .then((newSheet) => {
+        this.setState({ exporting: false });
+        console.log(newSheet);
+      });
   }
 
   projectFilter = (event) => {
@@ -83,6 +88,7 @@ class Calender extends PureComponent {
       projectList,
       personList,
       selectedProject,
+      exporting,
     } = this.state;
     return (
       <div>
@@ -102,7 +108,7 @@ class Calender extends PureComponent {
         </Box>
         {selectedProject && selectedProject !== 'none' && (
           <Box my="2em">
-            <button onClick={this.handleExport}>匯出專案</button>
+            <button disabled={exporting} onClick={this.handleExport}>匯出專案</button>
           </Box>
         )}
         <Box pt="66%" position="relative">
