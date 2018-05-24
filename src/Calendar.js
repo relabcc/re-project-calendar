@@ -9,6 +9,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 import colors from 'open-color/open-color.json';
 
+import generateProjectCalendar from './generateProjectCalendar';
 import Box from './components/Box';
 
 BigCalendar.momentLocalizer(moment);
@@ -59,6 +60,11 @@ class Calender extends PureComponent {
     this.setState({ selectedPerson: evt.target.value })
   }
 
+  handleExport = () => {
+    const { events, sheetApi } = this.props;
+    const calendar = generateProjectCalendar(sheetApi, events.filter(this.projectFilter), this.state.selectedProject);
+  }
+
   projectFilter = (event) => {
     const { selectedProject } = this.state;
     if (!selectedProject || selectedProject === 'none') return true;
@@ -76,10 +82,11 @@ class Calender extends PureComponent {
     const {
       projectList,
       personList,
+      selectedProject,
     } = this.state;
     return (
       <div>
-        <Box pb="2em">
+        <Box my="2em">
           <select onChange={this.handleProjectChange}>
             <option value="none">--篩選專案--</option>
             {projectList.map((project) => (
@@ -93,6 +100,11 @@ class Calender extends PureComponent {
             ))}
           </select>
         </Box>
+        {selectedProject && selectedProject !== 'none' && (
+          <Box my="2em">
+            <button onClick={this.handleExport}>匯出專案</button>
+          </Box>
+        )}
         <Box pt="66%" position="relative">
           <Box position="absolute" top="0" right="0" bottom="0" left="0">
             <BigCalendar

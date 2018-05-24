@@ -8,20 +8,20 @@ import Calendar from './Calendar';
 
 const parseRow = (data) => {
   const header = data.shift();
-  return data.map((values) => fromPairs(values.map((value, index) => [header[index], value])));
+  return data.map((row) => fromPairs(row.map((value, index) => [header[index], value])));
 };
 
 const SheetData = props => {
   return (
     <div>
       <GoogleSheet id={props.id} range={props.range}>
-        {({ error, data, loading }) =>
+        {({ error, data, loading, sheetApi }) =>
           loading ? (
             'Getting data...'
           ) : error ? (
             JSON.stringify(error, null, 2)
           ) : data ? (
-            <Calendar events={(parseRow(data))} />
+            <Calendar events={parseRow(data)} sheetApi={sheetApi} />
           ) : null
         }
       </GoogleSheet>

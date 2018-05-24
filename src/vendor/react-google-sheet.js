@@ -35,16 +35,6 @@ var asyncToGenerator = function (fn) {
   };
 };
 
-
-
-
-
-
-
-
-
-
-
 var _extends = Object.assign || function (target) {
   for (var i = 1; i < arguments.length; i++) {
     var source = arguments[i];
@@ -58,18 +48,6 @@ var _extends = Object.assign || function (target) {
 
   return target;
 };
-
-
-
-
-
-
-
-
-
-
-
-
 
 var objectWithoutProperties = function (obj, keys) {
   var target = {};
@@ -137,7 +115,8 @@ class GSheetData extends React.Component {
       error: this.state.error,
       data: this.state.data,
       loading: this.state.loading,
-      refetch: this.fetch
+      refetch: this.fetch,
+      sheetApi: this.props.api.client.sheets.spreadsheets,
     });
   }
 }
@@ -155,7 +134,7 @@ const GoogleSheet = props => React.createElement(
 
 const GoogleSheetsApi = (_ref) => {
   var _ref$scopes = _ref.scopes;
-  let scopes = _ref$scopes === undefined ? ['https://www.googleapis.com/auth/spreadsheets.readonly'] : _ref$scopes,
+  let scopes = _ref$scopes === undefined ? ['https://www.googleapis.com/auth/spreadsheets'] : _ref$scopes,
       props = objectWithoutProperties(_ref, ['scopes']);
   return React.createElement(GoogleApi, _extends({
     scopes: scopes,
