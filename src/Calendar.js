@@ -11,6 +11,9 @@ import colors from 'open-color/open-color.json';
 
 import generateProjectCalendar from './generateProjectCalendar';
 import Box from './components/Box';
+import SmartArrow from './components/SmartArrow';
+import Flex from './components/Flex';
+import Collapsible from 'react-collapsible';
 
 BigCalendar.momentLocalizer(moment);
 
@@ -26,6 +29,8 @@ class Calender extends PureComponent {
   state = {
     projectList: uniq(map(this.props.events, '專案名稱')),
     personList: uniq(map(this.props.events, '任務負責人')),
+    personIsOpen: true,
+
   }
 
   projects = {
@@ -57,7 +62,7 @@ class Calender extends PureComponent {
   }
 
   handlePersonChange = (evt) => {
-    this.setState({ selectedPerson: evt.target.value })
+    this.setState({ selectedPerson: evt })
   }
 
   handleExport = () => {
@@ -68,6 +73,18 @@ class Calender extends PureComponent {
         this.setState({ exporting: false });
         console.log(newSheet);
       });
+  }
+
+  handleTriggerClick = (key) => () => this.setState({ [key]: !this.state[key] })
+
+  setPerson = (person) => () => {
+    console.log(person);
+    this.setState({ selectedPerson: person });
+  }
+
+  setProject = (project) => () => {
+    console.log(project);
+    this.setState({ selectedProject: project });
   }
 
   projectFilter = (event) => {
@@ -89,10 +106,43 @@ class Calender extends PureComponent {
       personList,
       selectedProject,
       exporting,
+      personIsOpen,
     } = this.state;
     return (
-      <div>
-        <Box my="2em">
+      <Flex>
+        <Box w="25%">
+          <Collapsible
+            open={personIsOpen}
+            trigger={<SmartArrow isOpen={personIsOpen} bg="green" color="white">--你想找誰?--</SmartArrow>}
+            handleTriggerClick={this.handleTriggerClick('personIsOpen')}
+          >
+            <Box>
+              {personList.map((person) => (
+                <Box
+                  key={person}
+                  onClick={this.setPerson(person)}
+                >
+                  {person}
+                </Box>
+              ))}
+            </Box>
+          </Collapsible>
+          <Collapsible
+            trigger={<Box bg="green" color="white">--想看哪個專案啦?--</Box>}
+          >
+            <Box>
+              {projectList.map((project) => (
+                <Box
+                  key={project}
+                  onClick={this.setProject(project)}
+                >
+                  {project}
+                </Box>
+              ))}
+            </Box>
+          </Collapsible>
+        </Box>
+        {/* <Box my="2em">
           <select onChange={this.handleProjectChange}>
             <option value="none">--篩選專案--</option>
             {projectList.map((project) => (
@@ -105,13 +155,13 @@ class Calender extends PureComponent {
               <option key={person}>{person}</option>
             ))}
           </select>
-        </Box>
+        </Box> */}
         {selectedProject && selectedProject !== 'none' && (
           <Box my="2em">
             <button disabled={exporting} onClick={this.handleExport}>匯出專案</button>
           </Box>
         )}
-        <Box pt="66%" position="relative">
+        <Box w="75%" pt="66%" position="relative">
           <Box position="absolute" top="0" right="0" bottom="0" left="0">
             <BigCalendar
               events={events.filter(this.projectFilter).filter(this.personFilter)}
@@ -128,7 +178,7 @@ class Calender extends PureComponent {
             />
           </Box>
         </Box>
-      </div>
+      </Flex>
     );
   }
 }

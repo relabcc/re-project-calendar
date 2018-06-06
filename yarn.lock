@@ -5643,6 +5643,10 @@ react-broadcast@^0.7.0-rc.2:
     prop-types "^15.6.0"
     warning "^3.0.0"
 
+react-collapsible@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/react-collapsible/-/react-collapsible-2.2.0.tgz#257abef5b96a330d9249810761cac29a3d82f268"
+
 react-dev-utils@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/react-dev-utils/-/react-dev-utils-5.0.1.tgz#1f396e161fe44b595db1b186a40067289bf06613"
