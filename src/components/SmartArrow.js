@@ -6,8 +6,9 @@ const WithoutIsOpen = ({ isOpen, ...props }) => <Box {...props} />;
 
 export default styled(WithoutIsOpen)`
   position: relative;
+  cursor: pointer;
   &::after {
-    content: "${(props) => props.isOpen ? '▲' : '▼'}";
+    content: "${({ isOpen }) => isOpen ? '▲' : '▼'}";
     display: block;
     position: absolute;
     right: 1em;
