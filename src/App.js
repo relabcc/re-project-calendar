@@ -22,12 +22,12 @@ class App extends PureComponent {
               ) : error ? (
                 <Blob data={error} />
               ) : signedIn ? (
-                <Box py="1em">
-                  <Button onClick={signout}>Sign Out</Button>
+                <Box m="1em">
+                  <Button onClick={signout}>登出</Button>
                 </Box>
               ) : (
-                <Box py="1em">
-                  <Button onClick={authorize}>Authorize</Button>
+                <Box m="1em">
+                  <Button onClick={authorize}>登入</Button>
                 </Box>
               )}
               {signedIn && <SheetData id="1iwEuePpqoK3rGHd4ml54Bji4ZUm2IpqLlefs6f3Uzac" range="A:F" />}

@@ -18,6 +18,12 @@ import {
   fontSize,
   fontWeight,
   borderRadius,
+  border,
+  borderTop,
+  borderBottom,
+  borderLeft,
+  borderRight,
+  borderColor,
 } from 'styled-system';
 
 const injectTransform = responsiveStyle({
@@ -67,6 +73,12 @@ const Box = styled(tag)`
   ${fontWeight}
   ${borderRadius}
   ${injectVerticalAlign}
+  ${border}
+  ${borderTop}
+  ${borderBottom}
+  ${borderLeft}
+  ${borderRight}
+  ${borderColor}
   ${({ onClick }) => onClick && 'cursor: pointer;'}
 `;
 

@@ -8,7 +8,14 @@ import Calendar from './Calendar';
 
 const parseRow = (data) => {
   const header = data.shift();
-  return data.map((row) => fromPairs(row.map((value, index) => [header[index], value])));
+  return data.map((row) => {
+    const parsed = fromPairs(row.map((value, index) => [header[index], value]));
+    return {
+      ...parsed,
+      開始時間: new Date(parsed['開始時間']),
+      結束時間: new Date(parsed['結束時間']),
+    };
+  });
 };
 
 const SheetData = props => {

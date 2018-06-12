@@ -13,6 +13,7 @@ import {
   fontWeight,
   display,
   position,
+  textAlign,
 } from 'styled-system';
 import tag from 'clean-tag';
 
@@ -42,6 +43,7 @@ export const buttonStyle = css`
   ${borderRadius}
   ${fontWeight}
   ${letterSpacing}
+  ${textAlign}
   appearance: none;
   transition: all ${themeGet('duration', 250)}ms;
   cursor: pointer;
@@ -73,7 +75,6 @@ Button.defaultProps = {
   hoverBg: 'white',
   px: '1em',
   py: '0.5em',
-  borderRadius: '0.25em',
   fontWeight: 'bold',
   blacklist,
 };

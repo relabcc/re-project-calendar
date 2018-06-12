@@ -2,6 +2,7 @@ import merge from 'lodash/merge';
 import range from 'lodash/range';
 
 import constants from 'styled-system/dist/constants';
+// import colors from 'open-color/open-color.json';
 
 const emToPx = (em) => em * 16;
 
@@ -45,5 +46,4 @@ export default merge(constants, {
   containerWidth,
   font,
   duration: 250,
-  headerHeight: [50],
 });

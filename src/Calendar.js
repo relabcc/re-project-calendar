@@ -4,9 +4,11 @@ import map from 'lodash/map';
 import uniq from 'lodash/uniq';
 import set from 'lodash/set';
 import get from 'lodash/get';
+import compact from 'lodash/compact';
 
 import BigCalendar from 'react-big-calendar';
 import moment from 'moment';
+import Collapsible from 'react-collapsible';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 import colors from 'open-color/open-color.json';
@@ -16,8 +18,7 @@ import Box from './components/Box';
 import SmartArrow from './components/SmartArrow';
 import Flex from './components/Flex';
 import Button from './components/Button';
-
-import Collapsible from 'react-collapsible';
+import { chain } from './utils';
 
 BigCalendar.momentLocalizer(moment);
 
@@ -29,10 +30,22 @@ const availableColors = [
   'yellow',
 ];
 
+const ToggleButton = (props) => (
+  <Button
+    bg="white"
+    color="primary"
+    hoverBg="primary"
+    hoverColor="white"
+    border="none"
+    textAlign="left"
+    {...props}
+  />
+);
+
 class Calender extends PureComponent {
   state = {
-    projectList: uniq(map(this.props.events, '專案名稱')),
-    personList: uniq(map(this.props.events, '任務負責人')),
+    projectList: chain(uniq, compact)(map(this.props.events, '專案名稱')),
+    personList: chain(uniq, compact)(map(this.props.events, '任務負責人')),
     personIsOpen: true,
   }
 
@@ -120,52 +133,49 @@ class Calender extends PureComponent {
       personIsOpen,
       projectIsOpen
     } = this.state;
-    console.log(this.buttonRefs);
     return (
       <Flex>
         <Box w="25%" mr="0.5em">
           <Collapsible
             open={personIsOpen}
-            trigger={<SmartArrow isOpen={personIsOpen} bg="green" color="white">--找誰?--</SmartArrow>}
+            trigger={<SmartArrow isOpen={personIsOpen}>--找誰?--</SmartArrow>}
             handleTriggerClick={this.handleTriggerClick('personIsOpen')}
           >
             <Box>
               {personList.map((person) => {
                 const active = selectedPerson === person;
                 return (
-                  <Button
+                  <ToggleButton
                     w={1}
-                    my="0.25em"
                     key={person}
                     onClick={this.setPerson(person, active)}
                     active={active}
                     innerRef={this.handleButtonRef('person', person)}
                   >
                     {person}
-                  </Button>
+                  </ToggleButton>
                 )
               })}
             </Box>
           </Collapsible>
           <Collapsible
             open={projectIsOpen}
-            trigger={<SmartArrow isOpen={projectIsOpen} bg="green" color="white">--找專案?--</SmartArrow>}
+            trigger={<SmartArrow isOpen={projectIsOpen}>--找專案?--</SmartArrow>}
             handleTriggerClick={this.handleTriggerClick('projectIsOpen')}
           >
             <Box>
               {projectList.map((project) => {
                 const active = selectedProject === project;
                 return (
-                <Button
+                <ToggleButton
                   w={1}
-                  my="0.25em"
                   key={project}
                   onClick={this.setProject(project, active)}
                   active={active}
                   innerRef={this.handleButtonRef('project', project)}
                 >
                   {project}
-                </Button>
+                </ToggleButton>
                 )
               })}
             </Box>
@@ -185,7 +195,7 @@ class Calender extends PureComponent {
             ))}
           </select>
         </Box> */}
-        {selectedProject && selectedProject !== 'none' && (
+        {!process.env.NODE_ENV === 'production' && selectedProject && selectedProject !== 'none' && (
           <Box my="2em">
             <Button disabled={exporting} onClick={this.handleExport}>匯出專案</Button>
           </Box>
@@ -200,7 +210,8 @@ class Calender extends PureComponent {
               endAccessor="結束時間"
               eventPropGetter={(event) => ({
                 style: {
-                  backgroundColor: this.parseProjectColor(event['專案名稱']),
+                  backgroundColor: colors.gray[2],
+                  color: 'black',
                   opacity: event['任務完成日'] ? 0.2 : 1,
                 }
               })}
