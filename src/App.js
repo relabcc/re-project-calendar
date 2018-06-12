@@ -30,7 +30,7 @@ class App extends PureComponent {
                   <Button onClick={authorize}>登入</Button>
                 </Box>
               )}
-              {signedIn && <SheetData id="1iwEuePpqoK3rGHd4ml54Bji4ZUm2IpqLlefs6f3Uzac" range="A:F" />}
+              {signedIn && <SheetData id="1iwEuePpqoK3rGHd4ml54Bji4ZUm2IpqLlefs6f3Uzac" range="A:G" />}
             </div>
           )}
         </GoogleSheetsApi>

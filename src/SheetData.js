@@ -15,7 +15,7 @@ const parseRow = (data) => {
       開始時間: new Date(parsed['開始時間']),
       結束時間: new Date(parsed['結束時間']),
     };
-  });
+  }).filter((d) => !d['隱藏']);
 };
 
 const SheetData = props => {

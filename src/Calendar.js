@@ -73,8 +73,6 @@ class Calender extends PureComponent {
     return color;
   }
 
-  parseProjectColor = (projectName) => this.parseColor('projects', projectName)
-
   handleExport = () => {
     const { events, sheetApi } = this.props;
     this.setState({ exporting: true });
