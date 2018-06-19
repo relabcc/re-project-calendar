@@ -132,7 +132,7 @@ class Calender extends PureComponent {
       projectIsOpen
     } = this.state;
     return (
-      <Flex>
+      <Flex height="100%">
         <Box w="25%" mr="0.5em">
           <Collapsible
             open={personIsOpen}
@@ -178,43 +178,27 @@ class Calender extends PureComponent {
               })}
             </Box>
           </Collapsible>
+          {!process.env.NODE_ENV === 'production' && selectedProject && selectedProject !== 'none' && (
+            <Box my="2em">
+              <Button disabled={exporting} onClick={this.handleExport}>匯出專案</Button>
+            </Box>
+          )}
         </Box>
-        {/* <Box my="2em">
-          <select onChange={this.handleProjectChange}>
-            <option value="none">--篩選專案--</option>
-            {projectList.map((project) => (
-              <option key={project}>{project}</option>
-            ))}
-          </select>
-          <select onChange={this.handlePersonChange}>
-            <option value="none">--篩選人員--</option>
-            {personList.map((person) => (
-              <option key={person}>{person}</option>
-            ))}
-          </select>
-        </Box> */}
-        {!process.env.NODE_ENV === 'production' && selectedProject && selectedProject !== 'none' && (
-          <Box my="2em">
-            <Button disabled={exporting} onClick={this.handleExport}>匯出專案</Button>
-          </Box>
-        )}
-        <Box w="75%" pt="66%" position="relative">
-          <Box position="absolute" top="0" right="0" bottom="0" left="0">
-            <BigCalendar
-              events={events.filter(this.projectFilter).filter(this.personFilter)}
-              defaultDate={new Date()}
-              titleAccessor={(event) => `${event['專案名稱']} | ${event['任務名稱']} by ${event['任務負責人']}`}
-              startAccessor="開始時間"
-              endAccessor="結束時間"
-              eventPropGetter={(event) => ({
-                style: {
-                  backgroundColor: colors.gray[2],
-                  color: 'black',
-                  opacity: event['任務完成日'] ? 0.2 : 1,
-                }
-              })}
-            />
-          </Box>
+        <Box w="75%" height="100%" position="relative">
+          <BigCalendar
+            events={events.filter(this.projectFilter).filter(this.personFilter)}
+            defaultDate={new Date()}
+            titleAccessor={(event) => `${event['專案名稱']} | ${event['任務名稱']} by ${event['任務負責人']}`}
+            startAccessor="開始時間"
+            endAccessor="結束時間"
+            eventPropGetter={(event) => ({
+              style: {
+                backgroundColor: colors.gray[2],
+                color: 'black',
+                opacity: event['任務完成日'] ? 0.2 : 1,
+              }
+            })}
+          />
         </Box>
       </Flex>
     );

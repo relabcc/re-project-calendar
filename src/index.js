@@ -4,5 +4,9 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+const ROOT_ELE = document.getElementById('root');
+
+ROOT_ELE.style.setProperty('height', '100%');
+
+ReactDOM.render(<App />, ROOT_ELE);
 registerServiceWorker();

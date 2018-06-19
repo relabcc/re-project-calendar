@@ -4,6 +4,7 @@ import { GoogleSheetsApi } from './vendor/react-google-sheet'
 import Blob from './Blob';
 import SheetData from './SheetData';
 import Box from './components/Box';
+import Flex from './components/Flex';
 import Button from './components/Button';
 import ThemeProvider from './components/ThemeProvider';
 
@@ -16,22 +17,26 @@ class App extends PureComponent {
       <ThemeProvider>
         <GoogleSheetsApi clientId={CLIENT_ID} apiKey={API_KEY}>
           {({ authorize, loading: apiLoading, signout, signedIn, error }) => (
-            <div>
+            <Flex height="100%" flexDirection="column">
               {apiLoading ? (
                 <div>Loading...</div>
               ) : error ? (
                 <Blob data={error} />
               ) : signedIn ? (
-                <Box m="1em">
+                <Box p="1em">
                   <Button onClick={signout}>登出</Button>
                 </Box>
               ) : (
-                <Box m="1em">
+                <Box p="1em">
                   <Button onClick={authorize}>登入</Button>
                 </Box>
               )}
-              {signedIn && <SheetData id="1iwEuePpqoK3rGHd4ml54Bji4ZUm2IpqLlefs6f3Uzac" range="A:G" />}
-            </div>
+              {signedIn && (
+                <Box flex="1">
+                  <SheetData id="1iwEuePpqoK3rGHd4ml54Bji4ZUm2IpqLlefs6f3Uzac" range="A:H" />
+                </Box>
+              )}
+            </Flex>
           )}
         </GoogleSheetsApi>
       </ThemeProvider>
