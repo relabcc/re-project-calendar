@@ -33,7 +33,7 @@ class App extends PureComponent {
               )}
               {signedIn && (
                 <Box flex="1">
-                  <CalendarData id="1iwEuePpqoK3rGHd4ml54Bji4ZUm2IpqLlefs6f3Uzac" range="A:H" />
+                  <CalendarData />
                 </Box>
               )}
             </Flex>

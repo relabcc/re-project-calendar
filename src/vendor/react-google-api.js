@@ -2371,7 +2371,8 @@ class GoogleApi extends React.Component {
       _this.setState({
         client: gapi.client,
         loading: false,
-        signedIn: _this.auth.isSignedIn.get()
+        signedIn: _this.auth.isSignedIn.get(),
+        currentUser: _this.auth.currentUser.get().getBasicProfile().getEmail(),
       });
       _this.auth.isSignedIn.listen(function (signedIn) {
         return _this.setState({ signedIn });

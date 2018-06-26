@@ -92,7 +92,9 @@ class Calender extends PureComponent {
       ...list,
       [name]: index === 0,
     }), {}),
-    selected: {},
+    selected: {
+      // person: this.props.emailData[this.props.currentUser],
+    },
   }
 
   buttonRefs = {}
@@ -196,7 +198,7 @@ class Calender extends PureComponent {
             </Collapsible>
           ))}
         </Box>
-        <Box w="75%" height="100%" position="relative">
+        <Box w="75%" height="100%" maxHeight="100vh" position="relative">
           <BigCalendar
             events={this.getFilteredEvents()}
             defaultDate={new Date()}

@@ -118,6 +118,7 @@ class GSheetData extends React.Component {
       loading: this.state.loading,
       refetch: this.fetch,
       sheetApi: this.props.api.client.sheets.spreadsheets,
+      currentUser: this.props.api.currentUser,
     });
   }
 }
