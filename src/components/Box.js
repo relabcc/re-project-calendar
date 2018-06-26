@@ -26,6 +26,7 @@ import {
   borderColor,
   flex,
   maxHeight,
+  zIndex,
 } from 'styled-system';
 
 const injectTransform = responsiveStyle({
@@ -49,10 +50,9 @@ const injectOpacity = style({
   alias: 'alpha',
 });
 
-const zIndex = style({
-  prop: 'zIndex',
-  cssProperty: 'zIndex',
-  alias: 'z',
+const overflow = style({
+  prop: 'overflow',
+  cssProperty: 'overflow',
 });
 
 const Box = styled(tag)`
@@ -83,6 +83,7 @@ const Box = styled(tag)`
   ${borderColor}
   ${flex}
   ${maxHeight}
+  ${overflow}
   ${({ onClick }) => onClick && 'cursor: pointer;'}
 `;
 

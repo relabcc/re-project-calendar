@@ -5,8 +5,9 @@ import uniq from 'lodash/uniq';
 import set from 'lodash/set';
 import get from 'lodash/get';
 import compact from 'lodash/compact';
-import fromPairs from 'lodash/fromPairs';
-import addDays from 'date-fns/add_days';
+
+import { withContentRect } from 'react-measure';
+import { Scrollbars } from 'react-custom-scrollbars';
 
 import BigCalendar from 'react-big-calendar';
 import moment from 'moment';
@@ -23,19 +24,6 @@ import Button from './components/Button';
 import { chain } from './utils';
 
 BigCalendar.momentLocalizer(moment);
-
-const parseRow = (data) => {
-  const header = data.shift();
-  return data.map((row) => {
-    const parsed = fromPairs(row.map((value, index) => [header[index], value]));
-    return {
-      ...parsed,
-      開始時間: new Date(parsed['開始時間']),
-      結束時間: addDays(new Date(parsed['結束時間']), 1),
-      title: `${parsed['專案名稱']} | ${parsed['任務名稱']} by ${parsed['任務負責人']}`
-    };
-  }).filter((d) => !d['隱藏']);
-};
 
 const availableColors = [
   'red',
@@ -76,8 +64,7 @@ const avaliableFilters = [
 ];
 
 class Calender extends PureComponent {
-  static getDerivedStateFromProps({ data }) {
-    const events = parseRow(data);
+  static getDerivedStateFromProps({ events }) {
     return {
       events,
       optionsList: avaliableFilters.reduce((list, { key, name }) => ({
@@ -95,6 +82,10 @@ class Calender extends PureComponent {
     selected: {
       // person: this.props.emailData[this.props.currentUser],
     },
+  }
+
+  componentDidMount() {
+    this.props.measure();
   }
 
   buttonRefs = {}
@@ -169,36 +160,44 @@ class Calender extends PureComponent {
       optionsList,
       selected,
     } = this.state;
+    const {
+      measureRef,
+      contentRect,
+    } = this.props;
     return (
-      <Flex height="100%">
+      <Flex height="100%" innerRef={measureRef}>
         <Box w="25%" mr="0.5em">
-          {avaliableFilters.map((filter) => (
-            <Collapsible
-              key={filter.name}
-              open={isOpen[filter.name]}
-              trigger={<SmartArrow isOpen={isOpen[filter.name]}>--{filter.panelText}?--</SmartArrow>}
-              handleTriggerClick={this.handleTriggerClick(filter.name)}
-            >
-              <Box>
-                {optionsList[filter.name].map((item) => {
-                  const active = selected[filter.name] === item;
-                  return (
-                    <ToggleButton
-                      w={1}
-                      key={item}
-                      onClick={this.setFilter(filter.name, item, active)}
-                      active={active}
-                      innerRef={this.handleButtonRef(filter.name, item)}
-                    >
-                      {item}
-                    </ToggleButton>
-                  )
-                })}
-              </Box>
-            </Collapsible>
-          ))}
+          <Scrollbars style={{ height: contentRect.bounds.height }}>
+            <Box pb="1em">
+              {avaliableFilters.map((filter) => (
+                <Collapsible
+                  key={filter.name}
+                  open={isOpen[filter.name]}
+                  trigger={<SmartArrow isOpen={isOpen[filter.name]}>--{filter.panelText}?--</SmartArrow>}
+                  handleTriggerClick={this.handleTriggerClick(filter.name)}
+                >
+                  <Box>
+                    {optionsList[filter.name].map((item) => {
+                      const active = selected[filter.name] === item;
+                      return (
+                        <ToggleButton
+                          w={1}
+                          key={item}
+                          onClick={this.setFilter(filter.name, item, active)}
+                          active={active}
+                          innerRef={this.handleButtonRef(filter.name, item)}
+                        >
+                          {item}
+                        </ToggleButton>
+                      )
+                    })}
+                  </Box>
+                </Collapsible>
+              ))}
+            </Box>
+          </Scrollbars>
         </Box>
-        <Box w="75%" height="100%" maxHeight="100vh" position="relative">
+        <Box w="75%" height="100%" position="relative">
           <BigCalendar
             events={this.getFilteredEvents()}
             defaultDate={new Date()}
@@ -222,4 +221,4 @@ Calender.propTypes = {
   data: PropTypes.array,
 };
 
-export default Calender;
+export default withContentRect('bounds')(Calender);
