@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import fromPairs from 'lodash/fromPairs';
+import addDays from 'date-fns/add_days';
 
 import { GoogleSheet } from './vendor/react-google-sheet';
 
@@ -13,7 +14,7 @@ const parseRow = (data) => {
     return {
       ...parsed,
       開始時間: new Date(parsed['開始時間']),
-      結束時間: new Date(parsed['結束時間']),
+      結束時間: addDays(new Date(parsed['結束時間']), 1),
     };
   }).filter((d) => !d['隱藏']);
 };

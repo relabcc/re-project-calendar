@@ -1,4 +1,4 @@
-/* globals gapi */
+/* eslint-disable */
 import React from 'react';
 
 function createCommonjsModule(fn, module) {

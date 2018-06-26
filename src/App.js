@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import { GoogleSheetsApi } from './vendor/react-google-sheet'
 
 import Blob from './Blob';
-import SheetData from './SheetData';
+import CalendarData from './CalendarData';
 import Box from './components/Box';
 import Flex from './components/Flex';
 import Button from './components/Button';
@@ -33,7 +33,7 @@ class App extends PureComponent {
               )}
               {signedIn && (
                 <Box flex="1">
-                  <SheetData id="1iwEuePpqoK3rGHd4ml54Bji4ZUm2IpqLlefs6f3Uzac" range="A:H" />
+                  <CalendarData id="1iwEuePpqoK3rGHd4ml54Bji4ZUm2IpqLlefs6f3Uzac" range="A:H" />
                 </Box>
               )}
             </Flex>

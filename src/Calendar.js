@@ -5,6 +5,8 @@ import uniq from 'lodash/uniq';
 import set from 'lodash/set';
 import get from 'lodash/get';
 import compact from 'lodash/compact';
+import fromPairs from 'lodash/fromPairs';
+import addDays from 'date-fns/add_days';
 
 import BigCalendar from 'react-big-calendar';
 import moment from 'moment';
@@ -21,6 +23,19 @@ import Button from './components/Button';
 import { chain } from './utils';
 
 BigCalendar.momentLocalizer(moment);
+
+const parseRow = (data) => {
+  const header = data.shift();
+  return data.map((row) => {
+    const parsed = fromPairs(row.map((value, index) => [header[index], value]));
+    return {
+      ...parsed,
+      開始時間: new Date(parsed['開始時間']),
+      結束時間: addDays(new Date(parsed['結束時間']), 1),
+      title: `${parsed['專案名稱']} | ${parsed['任務名稱']} by ${parsed['任務負責人']}`
+    };
+  }).filter((d) => !d['隱藏']);
+};
 
 const availableColors = [
   'red',
@@ -43,9 +58,16 @@ const ToggleButton = (props) => (
 );
 
 class Calender extends PureComponent {
+  static getDerivedStateFromProps({ data }) {
+    const events = parseRow(data);
+    return {
+      events,
+      projectList: chain(uniq, compact)(map(events, '專案名稱')),
+      personList: chain(uniq, compact)(map(events, '任務負責人')),
+    };
+  }
+
   state = {
-    projectList: chain(uniq, compact)(map(this.props.events, '專案名稱')),
-    personList: chain(uniq, compact)(map(this.props.events, '任務負責人')),
     personIsOpen: true,
   }
 
@@ -74,7 +96,8 @@ class Calender extends PureComponent {
   }
 
   handleExport = () => {
-    const { events, sheetApi } = this.props;
+    const { sheetApi } = this.props;
+    const { events } = this.state;
     this.setState({ exporting: true });
     generateProjectCalendar(sheetApi, events.filter(this.projectFilter), this.state.selectedProject)
       .then((newSheet) => {
@@ -121,7 +144,6 @@ class Calender extends PureComponent {
   }
 
   render() {
-    const { events } = this.props;
     const {
       projectList,
       personList,
@@ -129,7 +151,8 @@ class Calender extends PureComponent {
       selectedPerson,
       exporting,
       personIsOpen,
-      projectIsOpen
+      projectIsOpen,
+      events,
     } = this.state;
     return (
       <Flex height="100%">
@@ -188,7 +211,6 @@ class Calender extends PureComponent {
           <BigCalendar
             events={events.filter(this.projectFilter).filter(this.personFilter)}
             defaultDate={new Date()}
-            titleAccessor={(event) => `${event['專案名稱']} | ${event['任務名稱']} by ${event['任務負責人']}`}
             startAccessor="開始時間"
             endAccessor="結束時間"
             eventPropGetter={(event) => ({
@@ -206,7 +228,7 @@ class Calender extends PureComponent {
 }
 
 Calender.propTypes = {
-  events: PropTypes.array,
+  data: PropTypes.array,
 };
 
 export default Calender;
