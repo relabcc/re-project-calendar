@@ -57,28 +57,42 @@ const ToggleButton = (props) => (
   />
 );
 
+const avaliableFilters = [
+  {
+    key: '任務負責人',
+    name: 'person',
+    panelText: '找誰',
+  },
+  {
+    key: '專案名稱',
+    name: 'project',
+    panelText: '找專案',
+  },
+  {
+    key: '任務類型',
+    name: 'category',
+    panelText: '找類型',
+  },
+];
+
 class Calender extends PureComponent {
   static getDerivedStateFromProps({ data }) {
     const events = parseRow(data);
     return {
       events,
-      projectList: chain(uniq, compact)(map(events, '專案名稱')),
-      personList: chain(uniq, compact)(map(events, '任務負責人')),
+      optionsList: avaliableFilters.reduce((list, { key, name }) => ({
+        ...list,
+        [name]: chain(uniq, compact)(map(events, key)),
+      }), {}),
     };
   }
 
   state = {
-    personIsOpen: true,
-  }
-
-  projects = {
-    byName: {},
-    count: 0
-  }
-
-  persons = {
-    byName: {},
-    count: 0
+    isOpen: avaliableFilters.reduce((list, { name }, index) => ({
+      ...list,
+      [name]: index === 0,
+    }), {}),
+    selected: {},
   }
 
   buttonRefs = {}
@@ -106,7 +120,15 @@ class Calender extends PureComponent {
       });
   }
 
-  handleTriggerClick = (key) => () => this.setState({ [key]: !this.state[key] })
+  handleTriggerClick = (key) => () => {
+    const { isOpen } = this.state;
+    this.setState({
+      isOpen: {
+        ...isOpen,
+        [key]: !isOpen[key],
+      },
+    })
+  }
 
   handleButtonRef = (type, key) => (ref) => {
     set(this.buttonRefs, [type, key], ref);
@@ -117,99 +139,66 @@ class Calender extends PureComponent {
     buttonRef.blur();
   }
 
-  setPerson = (person, active) => () => {
+  setFilter = (type, value, active) => () => {
+    const { selected } = this.state;
     this.setState({
-      selectedPerson: active ? '' : person,
+      selected: {
+        ...selected,
+        [type]: active ? 'none' : value,
+      },
     });
-    if (active) this.cancleFocus('person', person);
-   }
-
-  setProject = (project, active) => () => {
-    this.setState({
-      selectedProject: active? '' : project,
-    });
-    if (active) this.cancleFocus('project', project);
+    if (active) this.cancleFocus(type, value);
   }
 
-  projectFilter = (event) => {
-    const { selectedProject } = this.state;
-    if (!selectedProject || selectedProject === 'none') return true;
-    return event['專案名稱'] === selectedProject;
-  }
+  getFilteredEvents = () => avaliableFilters.reduce((filtered, filter, index) => filtered.filter(this.applyFilter(index)), this.state.events)
 
-  personFilter = (event) => {
-    const { selectedPerson } = this.state;
-    if (!selectedPerson || selectedPerson === 'none') return true;
-    return event['任務負責人'] === selectedPerson;
+  applyFilter = (index) => (event) => {
+    const filter = avaliableFilters[index];
+    const currentSelected = this.state.selected[filter.name];
+    if (!currentSelected || currentSelected === 'none') return true;
+    return event[filter.key] === currentSelected;
   }
 
   render() {
     const {
-      projectList,
-      personList,
-      selectedProject,
-      selectedPerson,
-      exporting,
-      personIsOpen,
-      projectIsOpen,
-      events,
+      // exporting,
+      // events,
+      isOpen,
+      optionsList,
+      selected,
     } = this.state;
     return (
       <Flex height="100%">
         <Box w="25%" mr="0.5em">
-          <Collapsible
-            open={personIsOpen}
-            trigger={<SmartArrow isOpen={personIsOpen}>--找誰?--</SmartArrow>}
-            handleTriggerClick={this.handleTriggerClick('personIsOpen')}
-          >
-            <Box>
-              {personList.map((person) => {
-                const active = selectedPerson === person;
-                return (
-                  <ToggleButton
-                    w={1}
-                    key={person}
-                    onClick={this.setPerson(person, active)}
-                    active={active}
-                    innerRef={this.handleButtonRef('person', person)}
-                  >
-                    {person}
-                  </ToggleButton>
-                )
-              })}
-            </Box>
-          </Collapsible>
-          <Collapsible
-            open={projectIsOpen}
-            trigger={<SmartArrow isOpen={projectIsOpen}>--找專案?--</SmartArrow>}
-            handleTriggerClick={this.handleTriggerClick('projectIsOpen')}
-          >
-            <Box>
-              {projectList.map((project) => {
-                const active = selectedProject === project;
-                return (
-                <ToggleButton
-                  w={1}
-                  key={project}
-                  onClick={this.setProject(project, active)}
-                  active={active}
-                  innerRef={this.handleButtonRef('project', project)}
-                >
-                  {project}
-                </ToggleButton>
-                )
-              })}
-            </Box>
-          </Collapsible>
-          {!process.env.NODE_ENV === 'production' && selectedProject && selectedProject !== 'none' && (
-            <Box my="2em">
-              <Button disabled={exporting} onClick={this.handleExport}>匯出專案</Button>
-            </Box>
-          )}
+          {avaliableFilters.map((filter) => (
+            <Collapsible
+              key={filter.name}
+              open={isOpen[filter.name]}
+              trigger={<SmartArrow isOpen={isOpen[filter.name]}>--{filter.panelText}?--</SmartArrow>}
+              handleTriggerClick={this.handleTriggerClick(filter.name)}
+            >
+              <Box>
+                {optionsList[filter.name].map((item) => {
+                  const active = selected[filter.name] === item;
+                  return (
+                    <ToggleButton
+                      w={1}
+                      key={item}
+                      onClick={this.setFilter(filter.name, item, active)}
+                      active={active}
+                      innerRef={this.handleButtonRef(filter.name, item)}
+                    >
+                      {item}
+                    </ToggleButton>
+                  )
+                })}
+              </Box>
+            </Collapsible>
+          ))}
         </Box>
         <Box w="75%" height="100%" position="relative">
           <BigCalendar
-            events={events.filter(this.projectFilter).filter(this.personFilter)}
+            events={this.getFilteredEvents()}
             defaultDate={new Date()}
             startAccessor="開始時間"
             endAccessor="結束時間"
