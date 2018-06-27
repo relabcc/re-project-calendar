@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import fromPairs from 'lodash/fromPairs';
 import addDays from 'date-fns/add_days';
 
-import withSheetData from './hoc/withSheetData';
+import withSheetData from '../hoc/withSheetData';
 import Calendar from './Calendar';
 
 const id = '1iwEuePpqoK3rGHd4ml54Bji4ZUm2IpqLlefs6f3Uzac';

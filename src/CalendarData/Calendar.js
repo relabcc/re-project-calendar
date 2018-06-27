@@ -17,11 +17,12 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import colors from 'open-color/open-color.json';
 
 import generateProjectCalendar from './generateProjectCalendar';
-import Box from './components/Box';
-import SmartArrow from './components/SmartArrow';
-import Flex from './components/Flex';
-import Button from './components/Button';
-import { chain } from './utils';
+import EventModal from './EventModal';
+import Box from '../components/Box';
+import SmartArrow from '../components/SmartArrow';
+import Flex from '../components/Flex';
+import Button from '../components/Button';
+import { chain } from '../utils';
 
 BigCalendar.momentLocalizer(moment);
 
@@ -66,7 +67,6 @@ const avaliableFilters = [
 class Calender extends PureComponent {
   static getDerivedStateFromProps({ events }) {
     return {
-      events,
       optionsList: avaliableFilters.reduce((list, { key, name }) => ({
         ...list,
         [name]: chain(uniq, compact)(map(events, key)),
@@ -103,8 +103,7 @@ class Calender extends PureComponent {
   }
 
   handleExport = () => {
-    const { sheetApi } = this.props;
-    const { events } = this.state;
+    const { sheetApi, events } = this.props;
     this.setState({ exporting: true });
     generateProjectCalendar(sheetApi, events.filter(this.projectFilter), this.state.selectedProject)
       .then((newSheet) => {
@@ -143,7 +142,7 @@ class Calender extends PureComponent {
     if (active) this.cancleFocus(type, value);
   }
 
-  getFilteredEvents = () => avaliableFilters.reduce((filtered, filter, index) => filtered.filter(this.applyFilter(index)), this.state.events)
+  getFilteredEvents = () => avaliableFilters.reduce((filtered, filter, index) => filtered.filter(this.applyFilter(index)), this.props.events)
 
   applyFilter = (index) => (event) => {
     const filter = avaliableFilters[index];
@@ -152,6 +151,10 @@ class Calender extends PureComponent {
     return event[filter.key] === currentSelected;
   }
 
+  setModal = (event) => this.setState({ modalData: event })
+
+  clearModal = () => this.setState({ modalData: null })
+
   render() {
     const {
       // exporting,
@@ -159,6 +162,7 @@ class Calender extends PureComponent {
       isOpen,
       optionsList,
       selected,
+      modalData,
     } = this.state;
     const {
       measureRef,
@@ -210,15 +214,24 @@ class Calender extends PureComponent {
                 opacity: event['任務完成日'] ? 0.2 : 1,
               }
             })}
+            popup
+            onSelectEvent={(event) => this.setModal(event)}
+            selectable="ignoreEvents"
           />
         </Box>
+        {modalData && (
+          <EventModal
+            data={modalData}
+            onRequestClose={this.clearModal}
+          />
+        )}
       </Flex>
     );
   }
 }
 
 Calender.propTypes = {
-  data: PropTypes.array,
+  events: PropTypes.array,
 };
 
 export default withContentRect('bounds')(Calender);
