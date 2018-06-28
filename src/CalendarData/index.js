@@ -21,7 +21,6 @@ const parseRow = (data) => {
   }).filter((d) => !d['隱藏']);
 };
 
-
 const withUserData = (SubComp) => {
   const WithUserData = ({ data, ...props }) => {
     data.shift();

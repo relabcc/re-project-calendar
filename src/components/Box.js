@@ -27,6 +27,7 @@ import {
   flex,
   maxHeight,
   zIndex,
+  maxWidth,
 } from 'styled-system';
 
 const injectTransform = responsiveStyle({
@@ -83,6 +84,7 @@ const Box = styled(tag)`
   ${borderColor}
   ${flex}
   ${maxHeight}
+  ${maxWidth}
   ${overflow}
   ${({ onClick }) => onClick && 'cursor: pointer;'}
 `;
