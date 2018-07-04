@@ -31,8 +31,21 @@ import Flex from '../components/Flex';
 import Button from '../components/Button';
 import Text from '../components/Text';
 import { chain } from '../utils';
+import TimelineView from './TimelineView';
 
 BigCalendar.momentLocalizer(moment);
+
+const modes = [
+  {
+    key: 'calendar',
+    label: '月曆',
+  },
+  {
+    key: 'timeline',
+    label: '時間線(測試版)',
+  },
+];
+
 
 const availableColors = [
   'red',
@@ -91,6 +104,7 @@ class Calender extends PureComponent {
       // person: this.props.emailData[this.props.currentUser],
     },
     events: this.props.events, // 把events複製進來
+    mode: modes[0].key,
   }
 
   componentDidMount() {
@@ -122,7 +136,6 @@ class Calender extends PureComponent {
     const validateEvents = events.filter((event) => isDate(event['開始時間']) && isDate(event['結束時間']) && event['專案名稱']); // 只留下有日期且有專案名稱的events
     const groupedByProject = groupBy(validateEvents, '專案名稱');
     // groupedByProject是一個大物件，以各專案名稱為key，其value為該專案名的的event陣列
-    console.log(groupedByProject);
     const summariesdProjects = mapValues(groupedByProject, (projectEvents, projectName) => (
       {
         title: projectName,
@@ -133,8 +146,7 @@ class Calender extends PureComponent {
     ));
     // minBy或maxBy會取得的是陣列中最小的或最大的那個值，此時我們的陣列是events的陣列，所以minBy或maxBy找到的結果會是一個event
     // 所以才需要event['開始時間']或event['結束時間']
-    console.log(summariesdProjects);
-    return map(summariesdProjects); // 返回陣列
+    return Object.values(summariesdProjects).map((project, id) => ({ ...project, id })); // 返回陣列
   }
 
   parseColor = (type, name) => {
@@ -213,13 +225,14 @@ class Calender extends PureComponent {
       selected,
       modalData,
       projectSummary,
+      mode,
     } = this.state;
     const {
       measureRef,
       contentRect,
     } = this.props;
     return (
-      <Flex height="100%" innerRef={measureRef}>
+      <Flex position="relative" height="100%" innerRef={measureRef}>
         <Box w="25%" mr="0.5em">
           <Scrollbars style={{ height: contentRect.bounds.height }}>
             <Box pb="1em">
@@ -259,22 +272,39 @@ class Calender extends PureComponent {
           </Scrollbars>
         </Box>
         <Box w="75%" height="100%" position="relative">
-          <BigCalendar
-            events={this.getFilteredEvents()}
-            defaultDate={new Date()}
-            startAccessor="開始時間"
-            endAccessor="結束時間"
-            eventPropGetter={(event) => ({
-              style: {
-                backgroundColor: colors.gray[2],
-                color: 'black',
-              }
-            })}
-            popup
-            onSelectEvent={(event) => this.setModal(event)}
-            selectable="ignoreEvents"
-            views={['month']}
-          />
+          {mode === 'calendar' && (
+            <BigCalendar
+              events={this.getFilteredEvents()}
+              defaultDate={new Date()}
+              startAccessor="開始時間"
+              endAccessor="結束時間"
+              eventPropGetter={(event) => ({
+                style: {
+                  backgroundColor: colors.gray[2],
+                  color: 'black',
+                }
+              })}
+              popup
+              onSelectEvent={(event) => this.setModal(event)}
+              selectable="ignoreEvents"
+              views={['month']}
+            />
+          )}
+          {mode === 'timeline' && (
+            <TimelineView
+              groups={avaliableFilters.map((filter) => ({ ...filter, options: optionsList[filter.name] }))}
+              events={this.getFilteredEvents()}
+              onSelectEvent={(event) => this.setModal(event)}
+              summaryMode={projectSummary}
+            />
+          )}
+        </Box>
+        <Box position="absolute" top="-3em" right="1em">
+          {modes.map(({ key, label }) => (
+            <Button key={key} onClick={() => this.setState({ mode: key })} active={mode === key}>
+              {label}
+            </Button>
+          ))}
         </Box>
         {modalData && (
           <EventModal

@@ -10,10 +10,11 @@ const id = '1iwEuePpqoK3rGHd4ml54Bji4ZUm2IpqLlefs6f3Uzac';
 
 const parseRow = (data) => {
   const header = data.shift();
-  return data.map((row) => {
+  return data.map((row, id) => {
     const parsed = fromPairs(row.map((value, index) => [header[index], value]));
     return {
       ...parsed,
+      id,
       開始時間: new Date(parsed['開始時間']),
       結束時間: addDays(new Date(parsed['結束時間']), 1),
       title: `${parsed['專案名稱']} | ${parsed['任務名稱']} by ${parsed['任務負責人']}`
