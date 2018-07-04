@@ -195,7 +195,7 @@ class Calender extends PureComponent {
     this.setState({
       selected: {
         ...selected,
-        [type]: active ? 'none' : value,
+        [type]: active ? null : value,
       },
     });
     if (active) this.cancleFocus(type, value);
@@ -206,7 +206,7 @@ class Calender extends PureComponent {
   applyFilter = (index) => (event) => {
     const filter = avaliableFilters[index];
     const currentSelected = this.state.selected[filter.name];
-    if (!currentSelected || currentSelected === 'none') return true;
+    if (!currentSelected) return true;
     return event[filter.key] === currentSelected;
   }
 
@@ -231,6 +231,7 @@ class Calender extends PureComponent {
       measureRef,
       contentRect,
     } = this.props;
+    console.log(selected);
     return (
       <Flex position="relative" height="100%" innerRef={measureRef}>
         <Box w="25%" mr="0.5em">
@@ -269,6 +270,11 @@ class Calender extends PureComponent {
               />
               <Text pl="0.5em">僅顯示專案起訖</Text>
             </Flex>
+            {selected.project && !selected.person && !selected.category && (
+            <Button>
+              匯出專案行事曆
+            </Button>
+            )}
           </Scrollbars>
         </Box>
         <Box w="75%" height="100%" position="relative">
