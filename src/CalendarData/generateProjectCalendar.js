@@ -1,18 +1,19 @@
 // https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/create
+import format from 'date-fns/format';
 
 const handleResponse = (response) => {
-  console.log(response);
   return response.result;
 };
 
 export default (spreadsheets, data, projectName) => {
+  console.log(data);
   const createNewSpreadSheet = (title) => spreadsheets.create({
-    properties: { title },
+    properties: { title: `${title}-${format(new Date(), 'YYYYMMDDHHmm')}` },
   }).then(handleResponse);
 
-  const setSpreadSheetValue = (spreadsheetId, values) => spreadsheets.values.update({
+  const setSpreadSheetValue = (spreadsheetId, values) => spreadsheets.values.append({
     spreadsheetId,
-    range: 'A1:D5',
+    range: 'A1',
     valueInputOption: 'USER_ENTERED',
     resource: { values },
   }).then(handleResponse);

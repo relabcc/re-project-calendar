@@ -164,7 +164,7 @@ class Calender extends PureComponent {
   handleExport = () => {
     const { sheetApi, events } = this.props;
     this.setState({ exporting: true });
-    generateProjectCalendar(sheetApi, events.filter(this.projectFilter), this.state.selectedProject)
+    generateProjectCalendar(sheetApi, events.filter(this.applyFilter(1)), this.state.selected.project)
       .then((newSheet) => {
         this.setState({ exporting: false });
         console.log(newSheet);
@@ -218,7 +218,7 @@ class Calender extends PureComponent {
 
   render() {
     const {
-      // exporting,
+      exporting,
       // events,
       isOpen,
       optionsList,
@@ -231,7 +231,6 @@ class Calender extends PureComponent {
       measureRef,
       contentRect,
     } = this.props;
-    console.log(selected);
     return (
       <Flex position="relative" height="100%" innerRef={measureRef}>
         <Box w="25%" mr="0.5em">
@@ -263,18 +262,20 @@ class Calender extends PureComponent {
                 </Collapsible>
               ))}
             </Box>
-            <Flex p="0.5em" align="center" is="label">
-              <Toggle
-                defaultChecked={projectSummary}
-                onChange={this.handleSummaryChange}
-              />
-              <Text pl="0.5em">僅顯示專案起訖</Text>
-            </Flex>
-            {selected.project && !selected.person && !selected.category && (
-            <Button>
-              匯出專案行事曆
-            </Button>
-            )}
+            <Box p="0.5em">
+              <Flex mb="1em" align="center" is="label">
+                <Toggle
+                  defaultChecked={projectSummary}
+                  onChange={this.handleSummaryChange}
+                />
+                <Text pl="0.5em">僅顯示專案起訖</Text>
+              </Flex>
+              {selected.project && !selected.person && !selected.category && (
+                <Button onClick={this.handleExport} disabled={exporting}>
+                  匯出專案行事曆
+                </Button>
+              )}
+            </Box>
           </Scrollbars>
         </Box>
         <Box w="75%" height="100%" position="relative">
