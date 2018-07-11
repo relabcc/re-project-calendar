@@ -118,6 +118,21 @@ class Calender extends PureComponent {
       if (this.state.projectSummary) return this.getProjectSummaries();
       // 如果為false，返回全部的events
       return this.props.events;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
     return null;
   }
@@ -136,6 +151,7 @@ class Calender extends PureComponent {
     const validateEvents = events.filter((event) => isDate(event['開始時間']) && isDate(event['結束時間']) && event['專案名稱']); // 只留下有日期且有專案名稱的events
     const groupedByProject = groupBy(validateEvents, '專案名稱');
     // groupedByProject是一個大物件，以各專案名稱為key，其value為該專案名的的event陣列
+    console.log(groupedByProject);
     const summariesdProjects = mapValues(groupedByProject, (projectEvents, projectName) => (
       {
         title: projectName,
