@@ -118,21 +118,6 @@ class Calender extends PureComponent {
       if (this.state.projectSummary) return this.getProjectSummaries();
       // 如果為false，返回全部的events
       return this.props.events;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
     return null;
   }
@@ -181,9 +166,14 @@ class Calender extends PureComponent {
     const { sheetApi, events } = this.props;
     this.setState({ exporting: true });
     generateProjectCalendar(sheetApi, events.filter(this.applyFilter(1)), this.state.selected.project)
-      .then((newSheet) => {
+      .then(({ spreadsheetId }) => {
         this.setState({ exporting: false });
-        console.log(newSheet);
+        window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/`)
+      })
+      .catch((e) => {
+        console.error(e)
+        this.setState({ exporting: false });
+        alert('匯出錯誤，請檢查')
       });
   }
 
