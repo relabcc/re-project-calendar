@@ -57,7 +57,7 @@ const blackBorder = {
   color: cssColorToRgbJson('#000'),
 };
 
-const getRange = (startRowIndex, endRowIndex) => ({
+const getWholeRowRange = (startRowIndex, endRowIndex) => ({
   startRowIndex,
   endRowIndex,
   startColumnIndex: 0,
@@ -65,6 +65,7 @@ const getRange = (startRowIndex, endRowIndex) => ({
 })
 
 export default (spreadsheets, data, projectName) => {
+  console.log(data)
   const createNewSpreadSheet = (title) => spreadsheets.create({
     properties: { title: `${title}-${format(new Date(), 'YYYYMMDDHHmm')}` },
   }).then(handleResponse);
@@ -76,20 +77,38 @@ export default (spreadsheets, data, projectName) => {
     resource: { values },
   }).then(handleResponse);
 
-  const formatSheet = (spreadsheetId, values) => {
+  const formatSheet = (spreadsheetId, values, colorData) => {
     const {
       monthHeaders,
       weekdayLabels,
       weekdays,
+      bluedays,
+      yellowdays,
       totalRows,
-    } = values.reduce((all, thisMonth) => {
+    } = values.reduce((all, thisMonth, mIndex) => {
       const { totalRows } = all;
-      all.monthHeaders.push(getRange(totalRows, totalRows + 1))
-      all.weekdayLabels.push(getRange(totalRows + 1, totalRows + 2))
+      all.monthHeaders.push(getWholeRowRange(totalRows, totalRows + 1))
+      all.weekdayLabels.push(getWholeRowRange(totalRows + 1, totalRows + 2))
       thisMonth.forEach((r, i) => {
         if (i % 2 === 0) {
           const rowStart = totalRows + 2 + i
-          all.weekdays.push(getRange(rowStart, rowStart + 2));
+          const colorRowIndex = i / 2;
+          colorData[mIndex][colorRowIndex].forEach((color, colIndex) => {
+            if (typeof color !== 'undefined') {
+              const coloredRange = {
+                startRowIndex: rowStart,
+                endRowIndex: rowStart + 2,
+                startColumnIndex: colIndex,
+                endColumnIndex: colIndex + 1,
+              };
+              if (color) {
+                all.yellowdays.push(coloredRange)
+              } else {
+                all.bluedays.push(coloredRange)
+              }
+            }
+          })
+          all.weekdays.push(getWholeRowRange(rowStart, rowStart + 2));
         }
       });
       all.totalRows += thisMonth.length + 2;
@@ -98,13 +117,15 @@ export default (spreadsheets, data, projectName) => {
       monthHeaders: [],
       weekdayLabels: [],
       weekdays: [],
+      bluedays: [],
+      yellowdays: [],
       totalRows: 0,
     });
     return spreadsheets.batchUpdate({ spreadsheetId }, {
       requests: [
         {
           updateBorders: {
-            range: getRange(0, totalRows),
+            range: getWholeRowRange(0, totalRows),
             top: blackBorder,
             left: blackBorder,
             bottom: blackBorder,
@@ -132,6 +153,28 @@ export default (spreadsheets, data, projectName) => {
               }
             },
             fields: 'userEnteredFormat(textFormat,horizontalAlignment,wrapStrategy)'
+          }
+        })),
+        ...bluedays.map(range => ({
+          repeatCell: {
+            range,
+            cell: {
+              userEnteredFormat: {
+                backgroundColor: cssColorToRgbJson('#548dd4'),
+              }
+            },
+            fields: 'userEnteredFormat(backgroundColor)'
+          }
+        })),
+        ...yellowdays.map(range => ({
+          repeatCell: {
+            range,
+            cell: {
+              userEnteredFormat: {
+                backgroundColor: cssColorToRgbJson('#ffc000'),
+              }
+            },
+            fields: 'userEnteredFormat(backgroundColor)'
           }
         })),
         ...monthHeaders.map((range) => ({
@@ -191,25 +234,26 @@ export default (spreadsheets, data, projectName) => {
 
   let key = 0;
   let toDay = calanderBegin;
-  for (; toDay < calanderEnd; key += 1) {
+  for (; toDay <= calanderEnd; key += 1) {
     toDay = addDays(calanderBegin, key);
     allDays[toDay] = [];
   }
 
   // step 2
   data.forEach((event) => {
-    allDays[subDays(event['結束時間'], 1)].push(event['任務名稱']);
+    allDays[subDays(event['結束時間'], 1)].push(event);
   });
 
   // step 3
   const cellData = [];
+  const colorData = [];
 
   let row;
   let col;
   let m = 0
   let mOffset = 0
   let nowDate = calanderBegin;
-  for (; nowDate < calanderEnd; mOffset += 1) {
+  for (; nowDate <= calanderEnd; mOffset += 1) {
     if (isFirstDayOfMonth(nowDate)) {
       m += 1
       mOffset %= 7
@@ -219,7 +263,11 @@ export default (spreadsheets, data, projectName) => {
       row = row + row;
       col = mOffset % 7;
       set(cellData, [m, row, col], format(nowDate, 'DD'));
-      set(cellData, [m, row + 1, col], allDays[nowDate].join('\n'));
+      const event = allDays[nowDate]
+      if (event && event.length) {
+        set(cellData, [m, row + 1, col], event.reduce((t, e, i) => `${t}${i > 0 ? '\n' : ''}${e['任務名稱']}`, ''));
+        set(colorData, [m, row / 2, col], event[0]['任務負責人'] === '客戶');
+      }
     }
     nowDate = addDays(nowDate, 1);
   }
@@ -230,6 +278,6 @@ export default (spreadsheets, data, projectName) => {
       ...all,
       ...getMonthHeader(addMonths(calanderBegin, i)),
       ...cd,
-    ], [])).then(() => formatSheet(spreadsheetId, cellData));
+    ], [])).then(() => formatSheet(spreadsheetId, cellData, colorData));
   });
 }
