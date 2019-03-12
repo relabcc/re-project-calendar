@@ -65,7 +65,6 @@ const getWholeRowRange = (startRowIndex, endRowIndex) => ({
 })
 
 export default (spreadsheets, data, projectName) => {
-  console.log(data)
   const createNewSpreadSheet = (title) => spreadsheets.create({
     properties: { title: `${title}-${format(new Date(), 'YYYYMMDDHHmm')}` },
   }).then(handleResponse);
