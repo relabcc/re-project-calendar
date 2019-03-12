@@ -76,13 +76,12 @@ export default (spreadsheets, data, projectName) => {
     resource: { values },
   }).then(handleResponse);
 
-  const formatSheet = (spreadsheetId, values, colorData) => {
+  const formatSheet = (spreadsheetId, values, whoData) => {
     const {
       monthHeaders,
       weekdayLabels,
       weekdays,
-      bluedays,
-      yellowdays,
+      colorDays,
       totalRows,
     } = values.reduce((all, thisMonth, mIndex) => {
       const { totalRows } = all;
@@ -92,21 +91,22 @@ export default (spreadsheets, data, projectName) => {
         if (i % 2 === 0) {
           const rowStart = totalRows + 2 + i
           const colorRowIndex = i / 2;
-          colorData[mIndex][colorRowIndex].forEach((color, colIndex) => {
-            if (typeof color !== 'undefined') {
-              const coloredRange = {
-                startRowIndex: rowStart,
-                endRowIndex: rowStart + 2,
-                startColumnIndex: colIndex,
-                endColumnIndex: colIndex + 1,
-              };
-              if (color) {
-                all.yellowdays.push(coloredRange)
-              } else {
-                all.bluedays.push(coloredRange)
+          const weekWho = whoData[mIndex][colorRowIndex]
+          if (weekWho) {
+            weekWho.forEach((who, colIndex) => {
+              if (typeof who !== 'undefined') {
+                all.colorDays.push({
+                  range: {
+                    startRowIndex: rowStart,
+                    endRowIndex: rowStart + 2,
+                    startColumnIndex: colIndex,
+                    endColumnIndex: colIndex + 1,
+                  },
+                  backgroundColor: who === '客戶' ? cssColorToRgbJson('#ffc000') : cssColorToRgbJson('#548dd4'),
+                })
               }
-            }
-          })
+            })
+          }
           all.weekdays.push(getWholeRowRange(rowStart, rowStart + 2));
         }
       });
@@ -116,8 +116,7 @@ export default (spreadsheets, data, projectName) => {
       monthHeaders: [],
       weekdayLabels: [],
       weekdays: [],
-      bluedays: [],
-      yellowdays: [],
+      colorDays: [],
       totalRows: 0,
     });
     return spreadsheets.batchUpdate({ spreadsheetId }, {
@@ -145,32 +144,22 @@ export default (spreadsheets, data, projectName) => {
             cell: {
               userEnteredFormat: {
                 horizontalAlignment : 'LEFT',
+                verticalAlignment: 'TOP',
                 textFormat: {
                   fontSize: 8,
                 },
                 wrapStrategy: 'WRAP',
               }
             },
-            fields: 'userEnteredFormat(textFormat,horizontalAlignment,wrapStrategy)'
+            fields: 'userEnteredFormat(textFormat,horizontalAlignment,verticalAlignment,wrapStrategy)'
           }
         })),
-        ...bluedays.map(range => ({
+        ...colorDays.map(({ range, backgroundColor }) => ({
           repeatCell: {
             range,
             cell: {
               userEnteredFormat: {
-                backgroundColor: cssColorToRgbJson('#548dd4'),
-              }
-            },
-            fields: 'userEnteredFormat(backgroundColor)'
-          }
-        })),
-        ...yellowdays.map(range => ({
-          repeatCell: {
-            range,
-            cell: {
-              userEnteredFormat: {
-                backgroundColor: cssColorToRgbJson('#ffc000'),
+                backgroundColor,
               }
             },
             fields: 'userEnteredFormat(backgroundColor)'
@@ -245,7 +234,7 @@ export default (spreadsheets, data, projectName) => {
 
   // step 3
   const cellData = [];
-  const colorData = [];
+  const whoData = [];
 
   let row;
   let col;
@@ -254,6 +243,10 @@ export default (spreadsheets, data, projectName) => {
   let nowDate = calanderBegin;
   for (; nowDate <= calanderEnd; mOffset += 1) {
     if (isFirstDayOfMonth(nowDate)) {
+      const lastMonthLength = cellData[m].length
+      if (lastMonthLength % 2) {
+        cellData[m][lastMonthLength] = [];
+      }
       m += 1
       mOffset %= 7
     }
@@ -265,7 +258,7 @@ export default (spreadsheets, data, projectName) => {
       const event = allDays[nowDate]
       if (event && event.length) {
         set(cellData, [m, row + 1, col], event.reduce((t, e, i) => `${t}${i > 0 ? '\n' : ''}${e['任務名稱']}`, ''));
-        set(colorData, [m, row / 2, col], event[0]['任務負責人'] === '客戶');
+        set(whoData, [m, row / 2, col], event[0]['任務負責人']);
       }
     }
     nowDate = addDays(nowDate, 1);
@@ -277,6 +270,6 @@ export default (spreadsheets, data, projectName) => {
       ...all,
       ...getMonthHeader(addMonths(calanderBegin, i)),
       ...cd,
-    ], [])).then(() => formatSheet(spreadsheetId, cellData, colorData));
+    ], [])).then(() => formatSheet(spreadsheetId, cellData, whoData));
   });
 }
