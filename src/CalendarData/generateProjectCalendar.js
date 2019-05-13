@@ -7,6 +7,8 @@ import addDays from 'date-fns/add_days';
 import addMonths from 'date-fns/add_months';
 import subDays from 'date-fns/sub_days';
 import setDay from 'date-fns/set_day';
+import isSameMonth from 'date-fns/is_same_month';
+import endOfMonth from 'date-fns/end_of_month';
 import isWeekend from 'date-fns/is_weekend';
 import isFirstDayOfMonth from 'date-fns/is_first_day_of_month';
 
@@ -77,6 +79,7 @@ export default (spreadsheets, data, projectName) => {
   }).then(handleResponse);
 
   const formatSheet = (spreadsheetId, values, whoData) => {
+    console.log(values)
     const {
       monthHeaders,
       weekdayLabels,
@@ -91,6 +94,7 @@ export default (spreadsheets, data, projectName) => {
         if (i % 2 === 0) {
           const rowStart = totalRows + 2 + i
           const colorRowIndex = i / 2;
+          console.log(mIndex)
           const weekWho = whoData[mIndex][colorRowIndex]
           if (weekWho) {
             weekWho.forEach((who, colIndex) => {
@@ -212,10 +216,18 @@ export default (spreadsheets, data, projectName) => {
     }).then(handleResponse);
   }
 
+  const getCalendarEnd = (endDate) => {
+    const calEnd = setDay(endDate, 5)
+    if (isSameMonth(endDate, calEnd)) {
+      return calEnd
+    }
+    return endOfMonth(endDate)
+  }
+
   const beginDate = minBy(data, '結束時間')['結束時間'];
   const calanderBegin = setDay(beginDate, 1);
   const endDate = maxBy(data, '結束時間')['結束時間'];
-  const calanderEnd = setDay(endDate, 5);
+  const calanderEnd = getCalendarEnd(endDate);
 
   // step 1
   const allDays = {};
