@@ -8,6 +8,7 @@ import addMonths from 'date-fns/add_months';
 import subDays from 'date-fns/sub_days';
 import setDay from 'date-fns/set_day';
 import isSameMonth from 'date-fns/is_same_month';
+import isSameDay from 'date-fns/is_same_day';
 import endOfMonth from 'date-fns/end_of_month';
 import isWeekend from 'date-fns/is_weekend';
 import isFirstDayOfMonth from 'date-fns/is_first_day_of_month';
@@ -20,6 +21,14 @@ const getMonthHeader = (date) => [
   [format(date, 'YYYY MMM')],
   ['MON', 'TUE', 'WED', 'THU', 'FRI']
 ]
+
+const getCalendarEnd = (endDate) => {
+  const calEnd = setDay(endDate, 5)
+  if (isSameMonth(endDate, calEnd)) {
+    return calEnd
+  }
+  return endOfMonth(endDate)
+}
 
 const parseHexColor = (hex) => {
   let m;
@@ -79,7 +88,7 @@ export default (spreadsheets, data, projectName) => {
   }).then(handleResponse);
 
   const formatSheet = (spreadsheetId, values, whoData) => {
-    console.log(values)
+    // values是每個月的日期陣列
     const {
       monthHeaders,
       weekdayLabels,
@@ -94,7 +103,6 @@ export default (spreadsheets, data, projectName) => {
         if (i % 2 === 0) {
           const rowStart = totalRows + 2 + i
           const colorRowIndex = i / 2;
-          console.log(mIndex)
           const weekWho = whoData[mIndex][colorRowIndex]
           if (weekWho) {
             weekWho.forEach((who, colIndex) => {
@@ -216,14 +224,6 @@ export default (spreadsheets, data, projectName) => {
     }).then(handleResponse);
   }
 
-  const getCalendarEnd = (endDate) => {
-    const calEnd = setDay(endDate, 5)
-    if (isSameMonth(endDate, calEnd)) {
-      return calEnd
-    }
-    return endOfMonth(endDate)
-  }
-
   const beginDate = minBy(data, '結束時間')['結束時間'];
   const calanderBegin = setDay(beginDate, 1);
   const endDate = maxBy(data, '結束時間')['結束時間'];
@@ -232,11 +232,10 @@ export default (spreadsheets, data, projectName) => {
   // step 1
   const allDays = {};
 
-  let key = 0;
   let toDay = calanderBegin;
-  for (; toDay <= calanderEnd; key += 1) {
-    toDay = addDays(calanderBegin, key);
+  for (; !isSameDay(toDay, calanderEnd);) {
     allDays[toDay] = [];
+    toDay = addDays(toDay, 1);
   }
 
   // step 2
@@ -250,27 +249,45 @@ export default (spreadsheets, data, projectName) => {
 
   let row;
   let col;
+  // 第幾個月
   let m = 0
-  let mOffset = 0
+  // 經過了幾天(用來計算本日要放在哪個格子(週一到週五))
+  let dOffset = 0
+  // 本月是否已經處理第一個工作日?
+  let hadWeekday
   let nowDate = calanderBegin;
-  for (; nowDate <= calanderEnd; mOffset += 1) {
+  for (; !isSameDay(nowDate, calanderEnd); dOffset += 1) {
     if (isFirstDayOfMonth(nowDate)) {
+      // 幫上個月的最後一周補上活動列(如果沒有活動的話)
       const lastMonthLength = cellData[m].length
       if (lastMonthLength % 2) {
         cellData[m][lastMonthLength] = [];
       }
       m += 1
-      mOffset %= 7
+      // 新的一個月，重新從第一周開始計算
+      dOffset %= 7
+      hadWeekday = false
     }
     if (!isWeekend(nowDate)) {
-      row = Math.floor(mOffset / 7);
+      // 如果本月尚未經歷任何工作日
+      if (!hadWeekday) {
+        // 並且已經度過一周
+        if (dOffset > 6) {
+          // 本月的周次再次從頭開始
+          dOffset %= 7
+        }
+        hadWeekday = true
+      }
+      row = Math.floor(dOffset / 7);
       row = row + row;
-      col = mOffset % 7;
+      col = dOffset % 7;
       set(cellData, [m, row, col], format(nowDate, 'DD'));
       const event = allDays[nowDate]
       if (event && event.length) {
         set(cellData, [m, row + 1, col], event.reduce((t, e, i) => `${t}${i > 0 ? '\n' : ''}${e['任務名稱']}`, ''));
         set(whoData, [m, row / 2, col], event[0]['任務負責人']);
+      } else {
+        set(cellData, [m, row + 1, col], '');
       }
     }
     nowDate = addDays(nowDate, 1);
