@@ -35,6 +35,7 @@
     "deploy": "gh-pages -d build"
   },
   "devDependencies": {
-    "gh-pages": "^1.1.0"
+    "gh-pages": "^1.1.0",
+    "js-yaml": ">=3.13.1"
   }
 }
